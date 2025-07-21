@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<ProjectReference Include="../Attribute_Collection/Attribute_Collection.csproj" />
+		<ProjectReference Include="..\IlWeaver\IlWeaver.csproj" />
+	</ItemGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+		<StartupObject>SideSharpExampleProject.Program</StartupObject>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<Target Name="RunIlLinkerTasks" AfterTargets="CoreCompile">
+		<PropertyGroup>
+			<IlWeaverPath>..\IlWeaver\bin\$(Configuration)\net8.0\IlWeaver</IlWeaverPath>
+		</PropertyGroup>
+
+		<Exec Command="chmod +x &quot;$(IlWeaverPath)&quot;"
+			  Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+
+		<Exec Command="&quot;$(IlWeaverPath)&quot; @(IntermediateAssembly -> ' &quot;%(FullPath)&quot;', ' ')" />
+	</Target>
+</Project>
