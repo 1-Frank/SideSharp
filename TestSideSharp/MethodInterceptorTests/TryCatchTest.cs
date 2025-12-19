@@ -16,7 +16,7 @@ namespace TestSideSharp.MethodInterceptorTests
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                Console.WriteLine("sasdasdasdasd");
             }
         }
     }
@@ -26,6 +26,7 @@ namespace TestSideSharp.MethodInterceptorTests
         [TryCatchMethod]
         public static void Test()
         {
+            Console.WriteLine("asdasdss");
             throw new Exception("Test");
         }
         [Test]
