@@ -236,7 +236,7 @@ namespace IlWeaver.IlWeavingProcessors
         
         public void PrintClassDetails(TypeDefinition type)
         {
-            using (StreamWriter writer = new StreamWriter("/home/frank/Bilder/test/log.txt", append: true))
+            using (StreamWriter writer = new StreamWriter("./log.txt", append: true))
             {
                 writer.WriteLine("----------------------------------------------------------------------");
                 writer.WriteLine($"Class: {type.Name}");
