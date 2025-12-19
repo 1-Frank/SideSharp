@@ -68,8 +68,7 @@ namespace IlWeaver.IlWeavingProcessors
 
             Instruction callNewMethodWithOriginalCodeInstruction = Instruction.Create(OpCodes.Call, newMethodRef);
             #endregion
-
-
+            
             method.Body.Instructions.Clear();
             method.Body.Variables.Clear();
             foreach (VariableDefinition? variable in attributeMethod.Body.Variables)
@@ -77,6 +76,11 @@ namespace IlWeaver.IlWeavingProcessors
                 method.Body.Variables.Add(new VariableDefinition(variable.VariableType));
             }
 
+            foreach (var exceptionHandler in attributeMethod.Body.ExceptionHandlers)
+            {
+                method.Body.ExceptionHandlers.Add(new ExceptionHandler(exceptionHandler.HandlerType));
+            }
+            
             ILProcessor methodIlProcessor = method.Body.GetILProcessor();
 
             VariableDefinition? returnValueVar = null;
@@ -113,6 +117,27 @@ namespace IlWeaver.IlWeavingProcessors
             }
             #endregion
 
+            method.Body.ExceptionHandlers.Clear();
+            foreach (var exceptionHandler in attributeMethod.Body.ExceptionHandlers)
+            {
+                var newHandler = new ExceptionHandler(exceptionHandler.HandlerType);
+                if (exceptionHandler.CatchType != null)
+                    newHandler.CatchType = attributeMethod.Module.ImportReference(exceptionHandler.CatchType);
+                if(exceptionHandler.TryStart != null)
+                    newHandler.TryStart = exceptionHandler.TryStart;
+                if(exceptionHandler.TryEnd != null)
+                    newHandler.TryEnd = exceptionHandler.TryEnd;
+                if(exceptionHandler.HandlerStart != null)
+                    newHandler.HandlerStart = exceptionHandler.HandlerStart;
+                if(exceptionHandler.HandlerEnd != null)
+                    newHandler.HandlerEnd = exceptionHandler.HandlerEnd;
+                if(exceptionHandler.FilterStart != null)
+                    newHandler.FilterStart = exceptionHandler.FilterStart;
+                
+                method.Body.ExceptionHandlers.Add(newHandler);
+            }
+
+            
             foreach (Instruction? instruction in attributeMethod.Body.Instructions)
             {
                 #region Paste in call to original method
@@ -167,7 +192,7 @@ namespace IlWeaver.IlWeavingProcessors
             method.Body.SimplifyMacros();
             method.Body.OptimizeMacros();
 
-            //PrintClassDetails(method.DeclaringType);
+            PrintClassDetails(method.DeclaringType);
 
             return assembly;
         }
@@ -208,16 +233,42 @@ namespace IlWeaver.IlWeavingProcessors
 
             return targetAssembly;
         }
-
-
+        
         public void PrintClassDetails(TypeDefinition type)
         {
-            Console.WriteLine("----------------------------------------------------------------------");
-            Console.WriteLine($"Class: {type.Name}"); foreach (MethodDefinition? method in type.Methods)
+            using (StreamWriter writer = new StreamWriter("/home/frank/Bilder/test/log.txt", append: true))
             {
-                Console.WriteLine($"\nMethod: {method.Name}"); Console.WriteLine("Parameters:"); foreach (ParameterDefinition? param in method.Parameters) { Console.WriteLine($" {param.Name} : {param.ParameterType}"); }
-                Console.WriteLine("Variables:"); foreach (VariableDefinition? variable in method.Body.Variables) { Console.WriteLine($" {variable.Index} : {variable.VariableType}"); }
-                Console.WriteLine("IL Code:"); foreach (Instruction? instruction in method.Body.Instructions) { Console.WriteLine($" {instruction}"); }
+                writer.WriteLine("----------------------------------------------------------------------");
+                writer.WriteLine($"Class: {type.Name}");
+
+                foreach (MethodDefinition? method in type.Methods)
+                {
+                    writer.WriteLine($"\nMethod: {method.Name}");
+            
+                    writer.WriteLine("Parameters:");
+                    foreach (ParameterDefinition? param in method.Parameters)
+                    {
+                        writer.WriteLine($" {param.Name} : {param.ParameterType}");
+                    }
+
+                    writer.WriteLine("Variables:");
+                    if (method.Body != null) // Check for null Body (interfaces/abstract methods have no body)
+                    {
+                        foreach (VariableDefinition? variable in method.Body.Variables)
+                        {
+                            writer.WriteLine($" {variable.Index} : {variable.VariableType}");
+                        }
+                    }
+
+                    writer.WriteLine("IL Code:");
+                    if (method.Body != null)
+                    {
+                        foreach (Instruction? instruction in method.Body.Instructions)
+                        {
+                            writer.WriteLine($" {instruction}");
+                        }
+                    }
+                }
             }
         }
     }

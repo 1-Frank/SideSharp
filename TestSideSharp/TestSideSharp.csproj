@@ -26,10 +26,6 @@
 		<Using Include="NUnit.Framework" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="ThesisObjectives\" />
-	</ItemGroup>
-
 	<Target Name="RunIlLinkerTasks" AfterTargets="CoreCompile">
 		<PropertyGroup>
 			<IlWeaverPath>..\IlWeaver\bin\$(Configuration)\net8.0\IlWeaver</IlWeaverPath>

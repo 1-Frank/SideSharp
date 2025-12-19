@@ -16,13 +16,7 @@ namespace IlWeaver
                                                     .Select(Activator.CreateInstance)
                                                     .OfType<IlWeavingProcessor>()
                                                     .ToList();
-
-
-            if (args.Count() == 0)
-            {
-                args = new List<string>() { "D:\\SideSharp\\Test_Project\\bin\\Debug\\net8.0\\Test_Project.dll" }.ToArray();
-            }
-
+            
             foreach (string assemblyPath in args)
             {
                 #region Weave IL Code
